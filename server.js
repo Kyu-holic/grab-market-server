@@ -10,7 +10,7 @@ const upload = multer({
       cb(null, "uploads/");
     },
     filename: function (req, file, cb) {
-      cb(null, file.originalname );
+      cb(null, file.originalname);
     },
   }),
 });
@@ -18,6 +18,7 @@ const port = 8080;
 
 app.use(express.json());
 app.use(cors());
+app.use("/uploads", express.static("uploads"));
 
 app.get("/products", (req, res) => {
   models.Product.findAll({
@@ -35,16 +36,16 @@ app.get("/products", (req, res) => {
       });
     })
     .catch((error) => {
-      res.send("에러 발생");
+      res.status(400).send("에러 발생");
     });
 });
 
 app.post("/products", (req, res) => {
   const body = req.body;
-  const { name, description, price, seller } = body;
+  const { name, description, price, seller, imageUrl } = body;
   // 아래 if 문은 하나라도 없으면 true가 되면서 전체 로직이 true가 된다. 그러면 아래 res.send 실행
-  if (!name || !description || !price || !seller) {
-    res.send("모든 필드를 입력해 주세요.");
+  if (!name || !description || !price || !seller || !imageUrl) {
+    res.status(400).send("모든 필드를 입력해 주세요.");
   }
   // models의 Product에 아래 내용들을 생성하겠다는 뜻
   models.Product.create({
@@ -52,6 +53,7 @@ app.post("/products", (req, res) => {
     description,
     price,
     seller,
+    imageUrl,
   })
     .then((result) => {
       console.log("상품 생성 결과 : ", result);
@@ -61,7 +63,7 @@ app.post("/products", (req, res) => {
     })
     .catch((error) => {
       console.error(error);
-      res.send("상품 업로드에 문제가 생겼습니다.");
+      res.status(400).send("상품 업로드에 문제가 생겼습니다.");
     });
 });
 
@@ -81,7 +83,7 @@ app.get("/products/:id", (req, res) => {
     })
     .catch((error) => {
       console.error(error);
-      console.log("상품 조회에 에러가 발생했습니다.");
+      res.status(400).send("상품 조회에 에러가 발생했습니다.");
     });
 });
 
